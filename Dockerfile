@@ -28,4 +28,4 @@ RUN mkdir -p /data && chown node:node /data
 USER node
 VOLUME /data
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["node_modules/.bin/react-router-serve", "./build/server/index.js"]

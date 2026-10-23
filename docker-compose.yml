@@ -7,6 +7,15 @@ services:
       - "${HOST_PORT:-3000}:3000"
     volumes:
       - blog-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    pids_limit: 200
 
 volumes:
   blog-data:

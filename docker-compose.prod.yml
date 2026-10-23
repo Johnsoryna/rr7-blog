@@ -7,6 +7,13 @@ services:
     restart: unless-stopped
     depends_on:
       - blog
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
     ports:
       - "80:80"
       - "443:443"
