@@ -137,6 +137,8 @@ Deployt auf meinem eigenen VPS (IaaS, Ubuntu 24.04, 4 vCPU, 8 GB RAM) mit Docker
 
 Ich habe keine eigene Domain. Zuerst lief die Seite über sslip.io (`rr7-blog.152-53-135-86.sslip.io`), das die IP-Adresse im Hostnamen auflöst. Im Schulnetz hat die Fortinet-Firewall diese Adresse aber gesperrt und ein eigenes Zertifikat eingesetzt, darum hat der Browser "unsicher" angezeigt. Gesperrt ist die ganze Kategorie der Gratis-DNS-Dienste (sslip.io, nip.io, duckdns.org), normale Domains gehen. Deshalb verwende ich jetzt den Hostnamen, den netcup dem Server automatisch gibt (`v2202511310846397435.powersrv.de`). Er hat ein eigenes Let's-Encrypt-Zertifikat und funktioniert auch im Schulnetz. Die alte Adresse funktioniert weiterhin.
 
+Für das Zertifikat braucht Caddy eine E-Mail-Adresse in der Datei `.env` (nicht im Repo). Damit kann Caddy auf ZeroSSL ausweichen, wenn Let's Encrypt nicht geht. Das war nötig, weil sich alle netcup-Kunden bei Let's Encrypt das Limit von 50 Zertifikaten pro Woche für `powersrv.de` teilen und es an diesem Tag schon erreicht war.
+
 Caddy setzt ausserdem Security-Header: HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy und Permissions-Policy. Die Header `Server` und `Via` werden entfernt.
 
 Auf dem Server:
@@ -144,6 +146,7 @@ Auf dem Server:
 ```
 git clone https://github.com/Johnsoryna/rr7-blog.git
 cd rr7-blog
+echo "ACME_EMAIL=meine@mail.ch" > .env
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
