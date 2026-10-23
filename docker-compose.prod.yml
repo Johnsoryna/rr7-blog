@@ -12,7 +12,8 @@ services:
       - "443:443"
       - "443:443/udp"
     environment:
-      SITE_ADDRESS: ${SITE_ADDRESS:-rr7-blog.152-53-135-86.sslip.io}
+      SITE_ADDRESS: ${SITE_ADDRESS:-v2202511310846397435.powersrv.de}
+      OLD_ADDRESS: ${OLD_ADDRESS:-rr7-blog.152-53-135-86.sslip.io}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data

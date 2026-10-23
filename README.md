@@ -3,7 +3,7 @@
 Modul 245, Aufgabe 7: React-Frameworks vergleichen und bewerten. Meine Card: **Remix / React Router 7**.
 
 - Repository: https://github.com/Johnsoryna/rr7-blog
-- Deployte App: https://rr7-blog.152-53-135-86.sslip.io
+- Deployte App: https://v2202511310846397435.powersrv.de
 
 Der Blog kann alle Beiträge auflisten, einen Beitrag im Detail anzeigen und über ein Formular neue Beiträge anlegen. Die Daten liegen in einer SQLite-Datenbank.
 
@@ -93,7 +93,7 @@ Lighthouse 13.5, gemessen auf der deployten URL (Liste `/` und Detail `/posts/1`
 | Liste | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 1.4 s | 0 ms | 0 |
 | Detail | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 1.4 s | 0 ms | 0 |
 
-Die Messung lief in einem Chromium-Container auf dem gleichen Server, weil das Schulnetz die sslip.io-Adresse blockiert. Lighthouse drosselt das Netzwerk dabei simuliert, die Werte sind also vergleichbar, aber die echte Distanz zum Server fehlt. Lokal mit Docker kam ich auf Mobile 98 und Desktop 100.
+Die Messung lief in einem Chromium-Container auf dem gleichen Server, weil das Schulnetz die erste Adresse (sslip.io) blockiert hat. Lighthouse drosselt das Netzwerk dabei simuliert, die Werte sind also vergleichbar, aber die echte Distanz zum Server fehlt. Lokal mit Docker kam ich auf Mobile 98 und Desktop 100.
 
 | Name | Server-Side Rendering | Single Page App | Static Generation | Serverless Affinity |
 | --- | --- | --- | --- | --- |
@@ -133,7 +133,11 @@ Preise der Anbieter am 23.10.2026: Vercel Hobby gratis (nur privat), Pro 20 USD 
 
 ## Deployment
 
-Deployt auf meinem eigenen VPS (IaaS, Ubuntu 24.04, 4 vCPU, 8 GB RAM) mit Docker Compose. Caddy dient als Reverse Proxy und holt automatisch ein Let's-Encrypt-Zertifikat. Da ich keine eigene Domain verwende, läuft die Seite über sslip.io, das die IP-Adresse im Hostnamen auflöst.
+Deployt auf meinem eigenen VPS (IaaS, Ubuntu 24.04, 4 vCPU, 8 GB RAM) mit Docker Compose. Caddy dient als Reverse Proxy und holt automatisch ein Let's-Encrypt-Zertifikat.
+
+Ich habe keine eigene Domain. Zuerst lief die Seite über sslip.io (`rr7-blog.152-53-135-86.sslip.io`), das die IP-Adresse im Hostnamen auflöst. Im Schulnetz hat die Fortinet-Firewall diese Adresse aber gesperrt und ein eigenes Zertifikat eingesetzt, darum hat der Browser "unsicher" angezeigt. Gesperrt ist die ganze Kategorie der Gratis-DNS-Dienste (sslip.io, nip.io, duckdns.org), normale Domains gehen. Deshalb verwende ich jetzt den Hostnamen, den netcup dem Server automatisch gibt (`v2202511310846397435.powersrv.de`). Er hat ein eigenes Let's-Encrypt-Zertifikat und funktioniert auch im Schulnetz. Die alte Adresse leitet auf die neue weiter.
+
+Caddy setzt ausserdem Security-Header: HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy und Permissions-Policy. Die Header `Server` und `Via` werden entfernt.
 
 Auf dem Server:
 
