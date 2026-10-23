@@ -141,6 +141,13 @@ Für das Zertifikat braucht Caddy eine E-Mail-Adresse in der Datei `.env` (nicht
 
 Caddy setzt ausserdem Security-Header: HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy und Permissions-Policy. Die Header `Server` und `Via` werden entfernt.
 
+Weitere Absicherung:
+
+- Formular: unsichtbares Honeypot-Feld gegen Bots, höchstens 5 Beiträge pro IP in 10 Minuten, Titel max. 120 und Text max. 10'000 Zeichen
+- Caddy lehnt Anfragen über 64 KB ab
+- Blog-Container: läuft als Benutzer `node`, Dateisystem nur lesbar (ausser `/data`), keine Linux-Capabilities, `no-new-privileges`, Speicherlimit 512 MB
+- Server: SSH nur mit Schlüssel, fail2ban, ufw und automatische Sicherheitsupdates
+
 Auf dem Server:
 
 ```
