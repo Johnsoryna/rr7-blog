@@ -1,4 +1,4 @@
-{$SITE_ADDRESS} {
+{$SITE_ADDRESS}, {$OLD_ADDRESS} {
 	encode zstd gzip
 
 	header {
@@ -13,8 +13,4 @@
 	}
 
 	reverse_proxy blog:3000
-}
-
-{$OLD_ADDRESS} {
-	redir https://{$SITE_ADDRESS}{uri} permanent
 }
