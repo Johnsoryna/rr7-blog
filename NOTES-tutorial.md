@@ -23,4 +23,4 @@ Grundlage war das offizielle Tutorial auf reactrouter.com (Framework Mode, "Addr
 
 - Setup und Tutorial durchlesen: ca. 1 Lektion
 - Blog umsetzen (Liste, Detail, Formular, DB): ca. 1 Lektion
-- Docker und Deployment: siehe README
+- Docker und Deployment: ca. 30 Minuten, siehe README
