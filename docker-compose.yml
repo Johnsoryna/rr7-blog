@@ -1,0 +1,12 @@
+services:
+  blog:
+    build: .
+    image: rr7-blog
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    volumes:
+      - blog-data:/data
+
+volumes:
+  blog-data:
