@@ -73,7 +73,7 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
       <header className="page-head">
         <h1 className="page-title">Neuer Beitrag</h1>
       </header>
-      <Form method="post" className="form">
+      <Form method="post" action="/posts/new" className="form">
         {errors?.form && (
           <p ref={alertRef} role="alert" tabIndex={-1} className="alert">
             <AlertIcon />
