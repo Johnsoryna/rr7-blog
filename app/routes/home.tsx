@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { getPosts } from "~/lib/posts.server";
@@ -17,8 +18,15 @@ export async function loader({}: Route.LoaderArgs) {
   return { posts: getPosts() };
 }
 
+let hasDrawn = false;
+
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { posts } = loaderData;
+  const [drawing] = useState(() => !hasDrawn);
+
+  useEffect(() => {
+    hasDrawn = true;
+  }, []);
 
   return (
     <>
@@ -36,7 +44,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           </Link>
         </p>
       ) : (
-        <ol className="route">
+        <ol className={drawing ? "route is-drawing" : "route"}>
           {posts.map((post, index) => (
             <li
               key={post.id}

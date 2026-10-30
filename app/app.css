@@ -311,8 +311,11 @@ body {
   width: var(--track);
   background: var(--line);
   transform-origin: top;
+}
+
+.route.is-drawing .stop::before {
   animation: draw 520ms var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 140ms);
+  animation-delay: calc(min(var(--i, 0), 6) * 80ms);
 }
 
 .stop:last-child::before {
