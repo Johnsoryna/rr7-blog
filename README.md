@@ -169,7 +169,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 | Build-Zeit lokal (Windows, Docker Desktop) | ca. 80 s |
 | Build-Zeit Server | ca. 26 s |
 | Image-Grösse | 420 MB |
-| Kosten | Preis VPS pro Monat: _noch eintragen_ |
+| Kosten | 11 CHF pro Monat für den VPS (läuft auch für andere Projekte, der Blog braucht nur einen kleinen Teil davon), Lizenz und Zertifikat gratis |
 
 Aufwand und Probleme:
 
@@ -180,24 +180,29 @@ Aufwand und Probleme:
 
 ## Anforderungen unseres Projekts
 
+Das Projekt ist hier der Blog selbst.
+
 ### Business Needs
 
-- Kostenrahmen: _noch eintragen_
-- Teamgrösse: _noch eintragen_
-- Zeit bis zur ersten Version: _noch eintragen_
-- Vorwissen im Team (React, Node, Docker): _noch eintragen_
+- Kostenrahmen: keine zusätzlichen Kosten. Der Blog soll auf meinem bestehenden VPS (11 CHF pro Monat) laufen.
+- Teamgrösse: 1 Person pro Card. Wir sind eine Vierergruppe, jede Person baut den Blog mit einem anderen Framework.
+- Zeit bis zur ersten Version: ca. 6 Lektionen (Woche 8), davon ca. 2 Lektionen für den Blog selbst.
+- Vorwissen: React-Grundlagen, Git und Docker kenne ich schon. Node auf dem Server und React Router im Framework Mode waren neu.
 
 ### Scalability Needs
 
-- Erwartete Anzahl Nutzer am Anfang und nach einem Jahr: _noch eintragen_
-- Braucht es Login, Echtzeit oder viele Schreibzugriffe: _noch eintragen_
-- Muss die App weltweit schnell sein (Edge) oder reicht ein Server: _noch eintragen_
+- Nutzer: Lehrperson und Klasse, also weniger als 50 Besucher. Es ist kein Wachstum geplant.
+- Kein Login, keine Echtzeit, wenige Schreibzugriffe (ab und zu ein neuer Beitrag).
+- Ein Server in Europa reicht, Edge-Hosting ist nicht nötig.
 
 ### Vergleich mit den Matrizen
 
-_Nach dem Ausfüllen der Anforderungen hier mit den Matrizen vergleichen._
+- Kosten: Die Lizenz ist gratis (MIT) und der Server ist schon da, also passt es in den Kostenrahmen. Vercel Hobby wäre auch gratis gewesen, dort hätte ich für die Beiträge aber eine externe Datenbank gebraucht.
+- Zeit: Das offizielle Tutorial hat gereicht, um den Blog in ca. 2 Lektionen zu bauen. Das Deployment mit Docker und Caddy hat ca. 30 Minuten gedauert, dazu kam das Problem mit dem Zertifikat im Schulnetz.
+- Skalierung: Für unter 50 Besucher reicht eine Instanz mit SQLite locker, Lighthouse zeigt überall 100. Erst bei echtem Wachstum müsste ich auf Postgres und mehrere Instanzen hinter einem Load Balancer wechseln. Das ginge mit React Router ohne Umbau am Framework.
+- Fazit: React Router 7 erfüllt alle Anforderungen. Für einen Blog ohne Formular wäre ein statisches Framework wie Astro noch einfacher, das zeigt dann der Vergleich mit den anderen Zeilen der Gruppe.
 
-React Router 7 passt gut, wenn das Projekt Formulare und Daten vom Server braucht, das Team schon React kann und die Kosten tief bleiben sollen, weil man nicht an einen Anbieter gebunden ist. Weniger passend ist es für eine reine statische Seite mit viel Inhalt (dafür wäre Astro einfacher) oder wenn man ein fertiges Komplettpaket mit Auth und Datenbank sucht.
+Allgemein passt React Router 7 gut, wenn das Projekt Formulare und Daten vom Server braucht, das Team schon React kann und die Kosten tief bleiben sollen, weil man nicht an einen Anbieter gebunden ist. Weniger passend ist es für eine reine statische Seite mit viel Inhalt (dafür wäre Astro einfacher) oder wenn man ein fertiges Komplettpaket mit Auth und Datenbank sucht.
 
 ## Erkenntnisse
 
@@ -216,7 +221,7 @@ React Router 7 passt gut, wenn das Projekt Formulare und Daten vom Server brauch
 - [x] Deployment auf IaaS durchgeführt
 - [x] Lighthouse-Messung durchgeführt und Werte notiert
 - [x] Alle vier Matrizen ausgefüllt (Zeile React Router 7)
-- [ ] Projekt-Anforderungen und Takeaways aufgeschrieben (Anforderungen noch ausfüllen)
+- [x] Projekt-Anforderungen und Takeaways aufgeschrieben
 
 ## Quellen
 
