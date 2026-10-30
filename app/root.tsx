@@ -11,6 +11,8 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/atkinson-hyperlegible-next";
 import "./app.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -22,7 +24,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen font-sans">
+      <body>
+        <a href="#inhalt" className="skip-link">
+          Zum Inhalt springen
+        </a>
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -33,30 +38,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function Header() {
   const navigation = useNavigation();
-  const linkClass = ({ isActive }: { isActive: boolean }) =>
-    isActive
-      ? "font-semibold text-blue-700 dark:text-blue-400"
-      : "text-gray-700 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400";
 
   return (
-    <header className="border-b border-gray-200 dark:border-gray-800">
-      <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-        <Link to="/" className="text-xl font-bold">
+    <header className="site-header">
+      <div className="wrap header-inner">
+        <Link to="/" className="wordmark">
+          <span className="wordmark-dot" aria-hidden="true" />
           RR7 Blog
         </Link>
-        <nav className="flex gap-6">
-          <NavLink to="/" end className={linkClass}>
+        <nav className="site-nav" aria-label="Hauptnavigation">
+          <NavLink to="/" end className="nav-link">
             Beiträge
           </NavLink>
-          <NavLink to="/posts/new" className={linkClass}>
+          <NavLink
+            to="/posts/new"
+            className={({ isActive }) =>
+              isActive ? "nav-link" : "button button-primary button-small"
+            }
+          >
             Neuer Beitrag
           </NavLink>
         </nav>
       </div>
       <div
-        className={`h-0.5 bg-blue-600 transition-all duration-500 ${
-          navigation.state === "idle" ? "w-0 opacity-0" : "w-full opacity-100"
-        }`}
+        className="progress"
+        data-state={navigation.state}
+        aria-hidden="true"
       />
     </header>
   );
@@ -66,7 +73,7 @@ export default function App() {
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <main id="inhalt" className="wrap page">
         <Outlet />
       </main>
     </>
@@ -82,7 +89,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     message = error.status === 404 ? "404" : "Fehler";
     details =
       error.status === 404
-        ? "Diese Seite gibt es nicht."
+        ? "Diese Haltestelle gibt es nicht."
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
@@ -90,20 +97,22 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="text-3xl font-bold">{message}</h1>
-      <p className="mt-2">{details}</p>
-      <Link
-        to="/"
-        className="mt-6 inline-block text-blue-700 underline dark:text-blue-400"
-      >
-        Zurück zur Übersicht
-      </Link>
-      {stack && (
-        <pre className="mt-6 w-full overflow-x-auto p-4">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </main>
+    <>
+      <Header />
+      <main id="inhalt" className="wrap error-page">
+        <h1 className="error-code">{message}</h1>
+        <p className="error-text">{details}</p>
+        <p className="error-actions">
+          <Link to="/" className="button button-primary">
+            Zurück zur Übersicht
+          </Link>
+        </p>
+        {stack && (
+          <pre className="error-stack">
+            <code>{stack}</code>
+          </pre>
+        )}
+      </main>
+    </>
   );
 }
