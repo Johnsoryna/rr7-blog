@@ -4,4 +4,5 @@ export default [
   index("routes/home.tsx"),
   route("posts/new", "routes/posts.new.tsx"),
   route("posts/:postId", "routes/posts.$postId.tsx"),
+  route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

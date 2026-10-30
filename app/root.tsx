@@ -15,6 +15,20 @@ import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/atkinson-hyperlegible-next";
 import "./app.css";
 
+export function meta({ error }: Route.MetaArgs) {
+  if (!error) {
+    return [];
+  }
+  return [
+    {
+      title:
+        isRouteErrorResponse(error) && error.status === 404
+          ? "Seite nicht gefunden | RR7 Blog"
+          : "Fehler | RR7 Blog",
+    },
+  ];
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">

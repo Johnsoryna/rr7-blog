@@ -588,7 +588,7 @@ textarea.input {
   gap: var(--space-4);
 }
 
-.error-page {
+main.error-page {
   padding-block: var(--space-8);
 }
 

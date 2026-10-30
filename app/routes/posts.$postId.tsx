@@ -1,11 +1,12 @@
-import { data, Link } from "react-router";
+import { data, isRouteErrorResponse, Link } from "react-router";
 import type { Route } from "./+types/posts.$postId";
 import { getPost } from "~/lib/posts.server";
 import { formatDate, toIsoDate } from "~/lib/date";
+import { NOT_FOUND_TITLE, RouteError } from "~/components/not-found";
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  if (!loaderData) {
-    return [{ title: "Beitrag nicht gefunden | RR7 Blog" }];
+export function meta({ loaderData, error }: Route.MetaArgs) {
+  if (error || !loaderData) {
+    return [{ title: NOT_FOUND_TITLE }];
   }
   return [
     { title: `${loaderData.post.title} | RR7 Blog` },
@@ -45,5 +46,11 @@ export default function PostDetail({ loaderData }: Route.ComponentProps) {
       </p>
       <div className="post-body">{post.body}</div>
     </article>
+  );
+}
+
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  return (
+    <RouteError status={isRouteErrorResponse(error) ? error.status : undefined} />
   );
 }
