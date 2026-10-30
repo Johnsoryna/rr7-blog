@@ -96,14 +96,16 @@ Die Werte haben wir am 23.10.2026 erhoben. Die anderen Frameworks bearbeiten and
 
 ### Performance
 
-Gemessen mit Lighthouse 13.5 auf der deployten URL, für die Liste `/` und die Detailseite `/posts/1`. Die Werte stehen in der Reihenfolge Performance / Accessibility / Best Practices / SEO.
+Gemessen am 30.10.2026 mit Lighthouse 13.6 auf der deployten URL, für die Liste `/` und die Detailseite `/posts/1`. Die Werte stehen in der Reihenfolge Performance / Accessibility / Best Practices / SEO.
 
 | Seite | Mobile | Desktop | LCP Mobile | TBT | CLS |
 | --- | --- | --- | --- | --- | --- |
-| Liste | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 1.4 s | 0 ms | 0 |
-| Detail | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 1.4 s | 0 ms | 0 |
+| Liste | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 0.8 s | 0 ms | 0.001 |
+| Detail | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 0.8 s | 0 ms | 0.001 |
 
 Lighthouse lief in einem Chromium-Container auf dem Server selbst. Aus dem Schulnetz ging es nicht, weil die Firewall die erste Adresse gesperrt hat (mehr dazu unter Deployment). Lighthouse simuliert ein langsames Netz, die Werte sind also vergleichbar. Die echte Distanz zum Server fehlt aber. Lokal mit Docker kamen wir auf Mobile 98 und Desktop 100.
+
+Die erste Messung vom 23.10.2026 (Lighthouse 13.5, noch mit dem Standard-Design) ergab ebenfalls überall 100, mit LCP Mobile 1.4 s. Danach haben wir das Design überarbeitet und zwei eigene Schriften eingebaut. Wir hatten erwartet, dass die Schriften die Ladezeit verschlechtern. Weil sie aber selbst gehostet sind und nur ca. 75 KB brauchen, blieb es bei 100. Lighthouse schlägt nur noch vor, ungenutztes JavaScript zu entfernen, an der Punktzahl ändert das nichts.
 
 | Name | Server-Side Rendering | Single Page App | Static Generation | Serverless Affinity |
 | --- | --- | --- | --- | --- |
