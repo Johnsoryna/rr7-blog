@@ -3,10 +3,10 @@ import {
   Link,
   Links,
   Meta,
-  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
   useNavigation,
 } from "react-router";
 
@@ -52,6 +52,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function Header() {
   const navigation = useNavigation();
+  const path = useLocation().pathname.replace(/\/+$/, "") || "/";
+  const onList = path === "/";
+  const onNew = path === "/posts/new";
 
   return (
     <header className="site-header">
@@ -61,17 +64,20 @@ function Header() {
           RR7 Blog
         </Link>
         <nav className="site-nav" aria-label="Hauptnavigation">
-          <NavLink to="/" end className="nav-link">
+          <Link
+            to="/"
+            className="nav-link"
+            aria-current={onList ? "page" : undefined}
+          >
             Beiträge
-          </NavLink>
-          <NavLink
+          </Link>
+          <Link
             to="/posts/new"
-            className={({ isActive }) =>
-              isActive ? "nav-link" : "button button-primary button-small"
-            }
+            className={onNew ? "nav-link" : "button button-primary button-small"}
+            aria-current={onNew ? "page" : undefined}
           >
             Neuer Beitrag
-          </NavLink>
+          </Link>
         </nav>
       </div>
       <div
