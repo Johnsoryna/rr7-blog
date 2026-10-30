@@ -1,152 +1,137 @@
-# RR7 Blog – Remix / React Router v7
+# RR7 Blog
 
-Modul 245, Aufgabe 7: React-Frameworks vergleichen und bewerten. Meine Card: **Remix / React Router 7**.
+Ein kleiner Blog mit React Router 7 und SQLite. Ich habe ihn für Modul 245, Aufgabe 7 (React-Frameworks vergleichen und bewerten) gebaut. Meine Card war Remix / React Router 7.
 
-- Repository: https://github.com/Johnsoryna/rr7-blog
-- Deployte App: https://v2202511310846397435.powersrv.de
+## Abgabe
 
-Der Blog kann alle Beiträge auflisten, einen Beitrag im Detail anzeigen und über ein Formular neue Beiträge anlegen. Die Daten liegen in einer SQLite-Datenbank.
+| | |
+| --- | --- |
+| Repository | https://github.com/Johnsoryna/rr7-blog |
+| Deployte App | https://v2202511310846397435.powersrv.de |
+| Tutorial-Notizen | [NOTES-tutorial.md](NOTES-tutorial.md) |
+| Lighthouse-Reports | [docs/lighthouse/](docs/lighthouse/) |
 
-## Lokal starten
+Checkliste:
+
+- [x] Card gelesen und Framework-Features dokumentiert
+- [x] Blog gemäss Tutorial erstellt und lokal gestartet
+- [x] Projekt mit Git verwaltet
+- [x] Deployment auf IaaS durchgeführt
+- [x] Lighthouse-Messung durchgeführt und Werte notiert
+- [x] Alle vier Matrizen ausgefüllt
+- [x] Projekt-Anforderungen und Takeaways aufgeschrieben
+
+## Der Blog
+
+Auf der Startseite stehen alle Beiträge, neuste zuerst. Ein Klick öffnet die Detailansicht. Unter "Neuer Beitrag" gibt es ein Formular mit Titel und Text, das die Eingaben auf dem Server prüft und danach auf den neuen Beitrag weiterleitet. Das Formular funktioniert auch, wenn im Browser JavaScript ausgeschaltet ist.
+
+Lokal starten (Node 20 oder neuer):
 
 ```
+git clone https://github.com/Johnsoryna/rr7-blog.git
+cd rr7-blog
 npm install
 npm run dev
 ```
 
-Produktionsbuild:
+Danach läuft der Blog auf http://localhost:5173. Die Datenbank `data/blog.db` wird beim ersten Start angelegt und bekommt zwei Beispielbeiträge.
 
-```
-npm run build
-npm start
-```
+Weitere Befehle:
 
-Mit Docker:
+| Befehl | Was er macht |
+| --- | --- |
+| `npm run build` und `npm start` | Produktionsbuild bauen und auf Port 3000 starten |
+| `npm run typecheck` | Typen generieren und mit TypeScript prüfen |
+| `docker compose up -d --build` | Blog im Container starten, Daten auf einem Volume |
 
-```
-docker compose up -d --build
-```
-
-## Aufbau
+Wichtige Dateien:
 
 | Datei | Inhalt |
 | --- | --- |
 | `app/routes.ts` | Routen-Konfiguration |
 | `app/routes/home.tsx` | Liste aller Beiträge (`loader`) |
 | `app/routes/posts.$postId.tsx` | Detailansicht, 404 wenn es die ID nicht gibt |
-| `app/routes/posts.new.tsx` | Formular mit `action`, Validierung und Redirect |
+| `app/routes/posts.new.tsx` | Formular mit `action`, Validierung, Spam-Schutz und Redirect |
 | `app/lib/db.server.ts` | SQLite-Verbindung, Tabelle und Startdaten |
-| `app/lib/posts.server.ts` | Funktionen zum Lesen und Speichern |
-| `Dockerfile`, `docker-compose.yml` | Container für die App |
-| `docker-compose.prod.yml`, `Caddyfile` | Reverse Proxy mit HTTPS auf dem Server |
+| `app/lib/posts.server.ts` | Beiträge lesen und speichern |
+| `app/lib/rate-limit.server.ts` | Limit für neue Beiträge pro IP |
+| `Dockerfile`, `docker-compose.yml` | Container für den Blog |
+| `docker-compose.prod.yml`, `Caddyfile` | Caddy als Reverse Proxy mit HTTPS auf dem Server |
 
-Verwendete Version: `react-router` 7.18.4. Mit `create-react-router@latest` bekommt man inzwischen v8. Weil die Card v7 behandelt, habe ich das Projekt mit `create-react-router@7` erstellt.
+Ich verwende `react-router` 7.18.4. Mit `create-react-router@latest` bekommt man inzwischen schon v8. Weil die Card v7 behandelt, habe ich das Projekt mit `create-react-router@7` erstellt.
 
-## Features von React Router 7 (Card)
+## React Router 7 (Card)
 
-React Router ist seit 2014 der Standard-Router für React. Remix war ein Full-Stack-Framework, das auf React Router aufgebaut hat. Im Mai 2024 hat das Team entschieden, beides zusammenzulegen: Was als Remix v3 geplant war, kam im November 2024 als React Router v7 heraus. Wer heute "Remix" mit React meint, verwendet also React Router 7 bzw. 8.
+React Router gibt es seit 2014, es war lange einfach der Router für React. Remix kam 2021 als Full-Stack-Framework dazu und war von Anfang an auf React Router aufgebaut. Im Mai 2024 hat das Team beides zusammengelegt: Was als Remix v3 geplant war, erschien im November 2024 als React Router v7. Wer heute Remix mit React meint, arbeitet also mit React Router 7 oder 8.
 
-React Router kann in drei Modi verwendet werden:
+Man kann React Router in drei Modi verwenden. Im Declarative Mode macht es nur Routing im Browser, so wie früher mit `<BrowserRouter>`. Im Data Mode definiert man Routen als Objekte mit `loader` und `action`, aber ohne eigenes Build-Tool. Der Framework Mode ist das frühere Remix, mit Vite-Plugin, Routen in `routes.ts`, Server-Side Rendering und generierten Typen. Für den Blog habe ich den Framework Mode genommen.
 
-- **Declarative Mode**: nur Routing im Browser, wie früher mit `<BrowserRouter>`.
-- **Data Mode**: Routen als Objekte mit `loader` und `action`, aber ohne eigenes Build-Tool.
-- **Framework Mode**: das frühere Remix. Vite-Plugin, Routen in `routes.ts`, Server-Side Rendering, Code-Splitting und generierte Typen. Diesen Modus habe ich für den Blog verwendet.
+Was ich im Framework Mode verwendet habe:
 
-Wichtige Konzepte im Framework Mode:
+- `loader` lädt die Daten auf dem Server, bevor die Seite gerendert wird.
+- `action` verarbeitet das Formular auf dem Server. `<Form>` schickt einen normalen POST, darum geht es auch ohne JavaScript.
+- `useNavigation` zeigt an, ob gerade geladen oder gespeichert wird. Ich nutze es für den blauen Ladebalken und den Button "Wird gespeichert...".
+- Dateien mit `.server.ts` landen nie im Client-Bundle. Darum liegt der Datenbankzugriff in `db.server.ts`.
+- Das Rendering lässt sich pro Projekt einstellen: SSR (Standard), SPA-Modus (`ssr: false`) oder statisches Pre-Rendering (`prerender`).
 
-- `loader`: lädt Daten auf dem Server, bevor die Seite gerendert wird.
-- `action`: verarbeitet Formulare auf dem Server. `<Form>` funktioniert auch ohne JavaScript im Browser (Progressive Enhancement).
-- `useNavigation`: zeigt an, ob gerade geladen oder gespeichert wird (Pending UI).
-- Dateien mit `.server.ts` werden nie ins Client-Bundle übernommen. Darum liegt die Datenbank in `db.server.ts`.
-- Rendering ist pro Projekt einstellbar: SSR (Standard), SPA-Modus (`ssr: false`) oder statisches Pre-Rendering (`prerender`).
-
-Zu Remix selbst: Seit Oktober 2026 gibt es Remix 3 (`remix@3.0.0`). Das ist aber ein komplett neues Framework, das nicht mehr auf React aufbaut. Für React-Projekte bleibt React Router der Weg.
+Seit Oktober 2026 gibt es Remix 3 (`remix@3.0.0`). Das ist ein neues Framework, das nicht mehr auf React aufbaut. Für React-Projekte bleibt React Router der Weg, der Name Remix führt da inzwischen eher in die Irre.
 
 ## Ecosystem-Summary
 
-React Router ist eines der ältesten und meistgenutzten Pakete im React-Ökosystem, knapp hinter Next.js bei den Downloads. Die vielen Downloads kommen aber auch daher, dass viele Projekte React Router nur als Client-Router nutzen. Den Framework Mode zeigt eher `@react-router/dev` mit ca. 1.5 Mio. Downloads pro Woche. Hinter dem Projekt steht Shopify (Remix wurde 2022 übernommen), Shopify nutzt es selbst für den Admin-Bereich. Seit Juni 2025 hat das Projekt eine offene Governance.
+React Router ist eines der ältesten und meistgenutzten Pakete im React-Umfeld. Bei den Downloads liegt es knapp hinter Next.js. Die Zahl ist aber geschönt, weil viele Projekte React Router nur als Client-Router nutzen. Wie viele den Framework Mode verwenden, zeigt eher `@react-router/dev` mit ca. 1.5 Mio. Downloads pro Woche. Hinter dem Projekt steht Shopify, das Remix 2022 gekauft hat und es selbst für den Admin-Bereich einsetzt. Seit Juni 2025 hat das Projekt eine offene Governance.
 
-Es gibt viele Releases. Seit April 2026 kamen 19 stabile Versionen heraus, und v7 bekommt auch nach dem Release von v8 noch Sicherheits-Patches. Negativ ist, dass sich die Namen und Pakete in den letzten Jahren oft geändert haben (Remix v2 → React Router v7 → v8 im Jahresrhythmus, dazu Remix 3 ohne React). Das macht die Suche nach Antworten im Internet manchmal verwirrend, weil viele Beiträge noch für Remix v2 geschrieben sind.
+Releases gibt es oft: 19 stabile Versionen zwischen April und Oktober 2026, und v7 bekommt auch nach dem Erscheinen von v8 noch Sicherheits-Patches. Was mich gestört hat, sind die vielen Namenswechsel. Remix v2 wurde zu React Router v7, ein Jahr später kam v8, und daneben gibt es jetzt Remix 3 ohne React. Bei der Suche nach Lösungen bin ich oft auf Beiträge für Remix v2 gestossen, die nicht mehr ganz stimmen.
 
 ## Matrizen
 
-Werte erhoben am 23.10.2026. Die Zeilen der anderen Frameworks füllt die Gruppe aus.
+Die Werte habe ich am 23.10.2026 erhoben. Die anderen Frameworks bearbeiten andere Personen, darum steht hier nur meine Zeile.
 
 ### Ecosystem
 
 | Name | Age | Usage | Documentation | Issue & Bug Fixes | Migration |
 | --- | --- | --- | --- | --- | --- |
-| Remix / React Router 7 | React Router seit 2014, Remix seit 2021, v7 seit 22.11.2024 | `react-router` 33.1 Mio. Downloads/Woche, `@react-router/dev` 1.5 Mio., 56.6k GitHub-Stars | Gut für die Grundlagen, Tutorial baut aber ein Adressbuch statt eines Blogs, keine echte DB im Tutorial (siehe `NOTES-tutorial.md`) | 122 offene Issues, 117 offene PRs, 19 Releases in 6 Monaten, v7 bekommt noch Patches | Remix v2 → v7 mit Future Flags und Codemod, v6 → v7 ohne Breaking Changes (mit Future Flags), v7 → v8 braucht Node 22.22 und React 19.2 |
-| create-react-app | | | | | |
-| Next.js | | | | | |
-| Gatsby | | | | | |
-| Blitz | | | | | |
-| Redwood | | | | | |
-| Astro | | | | | |
+| Remix / React Router 7 | React Router seit 2014, Remix seit 2021, v7 seit 22.11.2024 | `react-router` 33.1 Mio. Downloads pro Woche, `@react-router/dev` 1.5 Mio., 56.6k GitHub-Stars | Gut für die Grundlagen. Das Tutorial baut aber ein Adressbuch statt eines Blogs und zeigt keine echte Datenbank (siehe `NOTES-tutorial.md`) | 122 offene Issues, 117 offene PRs, 19 Releases in 6 Monaten, v7 bekommt noch Patches | Remix v2 → v7 mit Future Flags und Codemod, v6 → v7 ohne Breaking Changes (mit Future Flags), v7 → v8 braucht Node 22.22 und React 19.2 |
 
 ### Performance
 
-Lighthouse 13.5, gemessen auf der deployten URL (Liste `/` und Detail `/posts/1`), Reports in `docs/lighthouse/`. Reihenfolge der Werte: Performance / Accessibility / Best Practices / SEO.
+Gemessen mit Lighthouse 13.5 auf der deployten URL, für die Liste `/` und die Detailseite `/posts/1`. Die Werte stehen in der Reihenfolge Performance / Accessibility / Best Practices / SEO.
 
 | Seite | Mobile | Desktop | LCP Mobile | TBT | CLS |
 | --- | --- | --- | --- | --- | --- |
 | Liste | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 1.4 s | 0 ms | 0 |
 | Detail | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 | 1.4 s | 0 ms | 0 |
 
-Die Messung lief in einem Chromium-Container auf dem gleichen Server, weil das Schulnetz die erste Adresse (sslip.io) blockiert hat. Lighthouse drosselt das Netzwerk dabei simuliert, die Werte sind also vergleichbar, aber die echte Distanz zum Server fehlt. Lokal mit Docker kam ich auf Mobile 98 und Desktop 100.
+Lighthouse lief in einem Chromium-Container auf dem Server selbst. Aus dem Schulnetz ging es nicht, weil die Firewall die erste Adresse gesperrt hat (mehr dazu unter Deployment). Lighthouse simuliert ein langsames Netz, die Werte sind also vergleichbar. Die echte Distanz zum Server fehlt aber. Lokal mit Docker kam ich auf Mobile 98 und Desktop 100.
 
 | Name | Server-Side Rendering | Single Page App | Static Generation | Serverless Affinity |
 | --- | --- | --- | --- | --- |
-| Remix / React Router 7 | Ja, Standard (`ssr: true`) mit Streaming | Ja, mit `ssr: false` | Ja, mit `prerender` pro Route oder komplett | Gut: Adapter für Node, Express, Cloudflare Workers und AWS, Vercel und Netlify bieten eigene Vorlagen |
-| create-react-app | | | | |
-| Next.js | | | | |
-| Gatsby | | | | |
-| Blitz | | | | |
-| Redwood | | | | |
-| Astro | | | | |
+| Remix / React Router 7 | Ja, Standard (`ssr: true`) mit Streaming | Ja, mit `ssr: false` | Ja, mit `prerender` pro Route oder für alles | Gut: Adapter für Node, Express, Cloudflare Workers und AWS. Vercel und Netlify haben eigene Vorlagen |
 
 ### Business Models & Pricing
 
 | Name | Infrastruktur-Kosten | Lizenz-Kosten | Avg. Starter-Plan / Monat | Kosten kleine App | Kosten grosse App |
 | --- | --- | --- | --- | --- | --- |
-| Remix / React Router 7 | Läuft überall, wo Node läuft: eigener Server, Container, Serverless oder Edge | Keine (MIT) | ca. 5–20 USD (Cloudflare 5, Hetzner CX23 6 EUR, Vercel/Netlify Pro 20) | 0–6 EUR: ein kleiner VPS reicht, Gratis-Pläne möglich | Schätzung 50–300 USD: mehrere Instanzen, Load Balancer, Postgres statt SQLite, oder Vercel Pro mit Nutzungskosten |
-| create-react-app | | | | | |
-| Next.js | | | | | |
-| Gatsby | | | | | |
-| Blitz | | | | | |
-| Redwood | | | | | |
-| Astro | | | | | |
+| Remix / React Router 7 | Läuft überall, wo Node läuft: eigener Server, Container, Serverless oder Edge | Keine (MIT) | ca. 5–20 USD (Cloudflare 5 USD, Hetzner CX23 6 EUR, Vercel/Netlify Pro 20 USD) | 0–11 CHF: ein kleiner VPS reicht, Gratis-Pläne gehen auch | Geschätzt 50–300 USD: mehrere Instanzen, Load Balancer, Postgres statt SQLite, oder Vercel Pro mit Nutzungskosten |
 
-Preise der Anbieter am 23.10.2026: Vercel Hobby gratis (nur privat), Pro 20 USD pro Person; Netlify Free gratis, Pro 20 USD; Cloudflare Workers Paid 5 USD; Fly.io ab ca. 2 USD; Hetzner CX23 5.99 EUR; DigitalOcean ab 4 USD.
+Preise der Anbieter am 23.10.2026: Vercel Hobby gratis (nur privat), Pro 20 USD pro Person. Netlify Free gratis, Pro 20 USD. Cloudflare Workers Paid 5 USD. Fly.io ab ca. 2 USD, Hetzner CX23 5.99 EUR, DigitalOcean ab 4 USD.
 
 ### Scalability
 
 | Name | Horizontal Scaling | Host Provider Headroom | Additional Notes |
 | --- | --- | --- | --- |
-| Remix / React Router 7 | Gut: der Server speichert selbst keinen Zustand, mehrere Instanzen hinter einem Load Balancer sind möglich | Gross: Node-Server, Docker, Serverless und Edge (Cloudflare) | Mein Blog skaliert wegen SQLite nur auf einer Instanz. Für mehrere Instanzen müsste die DB zu Postgres o. ä. wechseln. Shopify nutzt Remix für den Admin (67 Mio. Seitenaufrufe pro Tag) |
-| create-react-app | | | |
-| Next.js | | | |
-| Gatsby | | | |
-| Blitz | | | |
-| Redwood | | | |
-| Astro | | | |
+| Remix / React Router 7 | Gut: Der Server speichert selbst keinen Zustand, mehrere Instanzen hinter einem Load Balancer sind möglich | Gross: Node-Server, Docker, Serverless und Edge (Cloudflare) | Mein Blog läuft wegen SQLite nur auf einer Instanz. Für mehrere Instanzen müsste die Datenbank zu Postgres o. ä. wechseln. Shopify nutzt Remix für den Admin mit 67 Mio. Seitenaufrufen pro Tag |
 
 ## Deployment
 
-Deployt auf meinem eigenen VPS (IaaS, Ubuntu 24.04, 4 vCPU, 8 GB RAM) mit Docker Compose. Caddy dient als Reverse Proxy und holt automatisch ein Let's-Encrypt-Zertifikat.
+Der Blog läuft auf meinem eigenen VPS bei netcup (IaaS, Ubuntu 24.04, 4 vCPU, 8 GB RAM) mit Docker Compose. Davor sitzt Caddy als Reverse Proxy und kümmert sich um HTTPS.
 
-Ich habe keine eigene Domain. Zuerst lief die Seite über sslip.io (`rr7-blog.152-53-135-86.sslip.io`), das die IP-Adresse im Hostnamen auflöst. Im Schulnetz hat die Fortinet-Firewall diese Adresse aber gesperrt und ein eigenes Zertifikat eingesetzt, darum hat der Browser "unsicher" angezeigt. Gesperrt ist die ganze Kategorie der Gratis-DNS-Dienste (sslip.io, nip.io, duckdns.org), normale Domains gehen. Deshalb verwende ich jetzt den Hostnamen, den netcup dem Server automatisch gibt (`v2202511310846397435.powersrv.de`). Er hat ein eigenes Let's-Encrypt-Zertifikat und funktioniert auch im Schulnetz. Die alte Adresse funktioniert weiterhin.
-
-Für das Zertifikat braucht Caddy eine E-Mail-Adresse in der Datei `.env` (nicht im Repo). Damit kann Caddy auf ZeroSSL ausweichen, wenn Let's Encrypt nicht geht. Das war nötig, weil sich alle netcup-Kunden bei Let's Encrypt das Limit von 50 Zertifikaten pro Woche für `powersrv.de` teilen und es an diesem Tag schon erreicht war.
-
-Caddy setzt ausserdem Security-Header: HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy und Permissions-Policy. Die Header `Server` und `Via` werden entfernt.
-
-Weitere Absicherung:
-
-- Formular: unsichtbares Honeypot-Feld gegen Bots, höchstens 5 Beiträge pro IP in 10 Minuten, Titel max. 120 und Text max. 10'000 Zeichen
-- Caddy lehnt Anfragen über 64 KB ab
-- Blog-Container: läuft als Benutzer `node`, Dateisystem nur lesbar (ausser `/data`), keine Linux-Capabilities, `no-new-privileges`, Speicherlimit 512 MB
-- Server: SSH nur mit Schlüssel, fail2ban, ufw und automatische Sicherheitsupdates
+| | Wert |
+| --- | --- |
+| Build-Zeit lokal (Windows, Docker Desktop) | ca. 80 s |
+| Build-Zeit Server | ca. 26 s |
+| Image-Grösse | 420 MB |
+| Aufwand | ca. 30 Minuten, dazu das Zertifikat-Problem weiter unten |
+| Kosten | 11 CHF pro Monat für den VPS, der auch für andere Projekte läuft. Lizenz und Zertifikat sind gratis |
 
 Auf dem Server:
 
@@ -157,71 +142,54 @@ echo "ACME_EMAIL=meine@mail.ch" > .env
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-Update:
+Für ein Update reichen `git pull` und derselbe `docker compose`-Befehl. Hat sich das `Caddyfile` geändert, muss Caddy neu starten (`docker compose ... restart caddy`), weil der Container sonst noch die alte Datei sieht.
 
-```
-git pull
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-```
+Was nicht auf Anhieb geklappt hat:
 
-| | Wert |
-| --- | --- |
-| Build-Zeit lokal (Windows, Docker Desktop) | ca. 80 s |
-| Build-Zeit Server | ca. 26 s |
-| Image-Grösse | 420 MB |
-| Kosten | 11 CHF pro Monat für den VPS (läuft auch für andere Projekte, der Blog braucht nur einen kleinen Teil davon), Lizenz und Zertifikat gratis |
+- `better-sqlite3` ist ein natives Modul und brauchte im Docker-Image Python, make und g++. Der erste Build ist deshalb fehlgeschlagen. Die Build-Tools sind jetzt nur in den Build-Stages, im fertigen Image fehlen sie.
+- Ich habe keine eigene Domain. Zuerst lief der Blog über sslip.io (`rr7-blog.152-53-135-86.sslip.io`), das die IP-Adresse direkt im Hostnamen auflöst. Die Fortinet-Firewall im Schulnetz sperrt aber alle solchen Gratis-DNS-Dienste und setzt ihr eigenes Zertifikat ein. Der Browser hat deshalb "unsicher" angezeigt, obwohl das Zertifikat in Ordnung war. Jetzt verwende ich den Hostnamen, den netcup dem Server automatisch gibt (`v2202511310846397435.powersrv.de`). Den lässt die Firewall durch.
+- Für diesen Hostnamen hat Let's Encrypt kein Zertifikat ausgestellt. Alle netcup-Kunden teilen sich das Limit von 50 Zertifikaten pro Woche für `powersrv.de`, und das war erreicht. Mit einer E-Mail-Adresse in `.env` weicht Caddy auf ZeroSSL aus. Von dort kommt das aktuelle Zertifikat, gültig bis 21.01.2027. Caddy verlängert es selbst.
 
-Aufwand und Probleme:
+Sicherheit:
 
-- `better-sqlite3` ist ein natives Modul. Im Docker-Image fehlten Python, make und g++, deshalb ist der erste Build fehlgeschlagen. Ich habe die Build-Tools nur in den Build-Stages installiert, im fertigen Image sind sie nicht drin.
-- Die Datenbank liegt auf einem Docker-Volume (`/data`), damit Beiträge einen Neustart überleben. Das habe ich getestet.
-- Caddy einzurichten ging schnell (vier Zeilen im `Caddyfile`). Das Zertifikat war nach wenigen Sekunden da.
-- Gesamtaufwand für das Deployment: ca. 30 Minuten. Bei Vercel wäre es schneller gegangen, dafür hätte ich für SQLite eine externe Datenbank gebraucht.
+- Das Formular hat ein unsichtbares Honeypot-Feld gegen Bots und nimmt höchstens 5 Beiträge pro IP in 10 Minuten an. Der Titel darf 120 Zeichen lang sein, der Text 10'000.
+- Caddy lehnt Anfragen über 64 KB ab und setzt Security-Header (HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy). Die Header `Server` und `Via` entfernt es.
+- Der Blog-Container läuft als Benutzer `node`, das Dateisystem ist bis auf `/data` nur lesbar, dazu `no-new-privileges`, keine Linux-Capabilities und 512 MB Speicherlimit.
+- Auf dem Server geht SSH nur mit Schlüssel, dazu laufen fail2ban, ufw und automatische Sicherheitsupdates.
 
 ## Anforderungen unseres Projekts
 
 Das Projekt ist hier der Blog selbst.
 
-### Business Needs
+Business Needs:
 
 - Kostenrahmen: keine zusätzlichen Kosten. Der Blog soll auf meinem bestehenden VPS (11 CHF pro Monat) laufen.
-- Teamgrösse: 1 Person pro Card. Wir sind eine Vierergruppe, jede Person baut den Blog mit einem anderen Framework.
-- Zeit bis zur ersten Version: ca. 6 Lektionen (Woche 8), davon ca. 2 Lektionen für den Blog selbst.
-- Vorwissen: React-Grundlagen, Git und Docker kenne ich schon. Node auf dem Server und React Router im Framework Mode waren neu.
+- Teamgrösse: 1 Person. Ich bearbeite die Card React Router 7, die anderen Frameworks machen andere.
+- Zeit: ca. 6 Lektionen (Woche 8), davon ca. 2 Lektionen für den Blog selbst.
+- Vorwissen: React-Grundlagen, Git und Docker kannte ich schon. Node auf dem Server und React Router im Framework Mode waren neu.
 
-### Scalability Needs
+Scalability Needs:
 
-- Nutzer: Lehrperson und Klasse, also weniger als 50 Besucher. Es ist kein Wachstum geplant.
-- Kein Login, keine Echtzeit, wenige Schreibzugriffe (ab und zu ein neuer Beitrag).
-- Ein Server in Europa reicht, Edge-Hosting ist nicht nötig.
+- Nutzer: Lehrperson und Klasse, also weniger als 50 Besucher. Wachstum ist keines geplant.
+- Kein Login, keine Echtzeit, wenig Schreibzugriffe (ab und zu ein neuer Beitrag).
+- Ein Server in Europa reicht, Edge-Hosting braucht es nicht.
 
-### Vergleich mit den Matrizen
+Vergleich mit den Matrizen:
 
-- Kosten: Die Lizenz ist gratis (MIT) und der Server ist schon da, also passt es in den Kostenrahmen. Vercel Hobby wäre auch gratis gewesen, dort hätte ich für die Beiträge aber eine externe Datenbank gebraucht.
-- Zeit: Das offizielle Tutorial hat gereicht, um den Blog in ca. 2 Lektionen zu bauen. Das Deployment mit Docker und Caddy hat ca. 30 Minuten gedauert, dazu kam das Problem mit dem Zertifikat im Schulnetz.
-- Skalierung: Für unter 50 Besucher reicht eine Instanz mit SQLite locker, Lighthouse zeigt überall 100. Erst bei echtem Wachstum müsste ich auf Postgres und mehrere Instanzen hinter einem Load Balancer wechseln. Das ginge mit React Router ohne Umbau am Framework.
-- Fazit: React Router 7 erfüllt alle Anforderungen. Für einen Blog ohne Formular wäre ein statisches Framework wie Astro noch einfacher, das zeigt dann der Vergleich mit den anderen Zeilen der Gruppe.
+- Kosten: Die Lizenz ist gratis (MIT) und der Server war schon da. Vercel Hobby wäre auch gratis gewesen, dort hätte ich für die Beiträge aber eine externe Datenbank gebraucht.
+- Zeit: Mit dem offiziellen Tutorial war der Blog in ca. 2 Lektionen fertig. Das Deployment mit Docker und Caddy hat ca. 30 Minuten gedauert, das Zertifikat im Schulnetz hat mich dann aber länger beschäftigt als der ganze Code.
+- Skalierung: Für unter 50 Besucher reicht eine Instanz mit SQLite locker, Lighthouse zeigt überall 100. Erst bei echtem Wachstum müsste ich auf Postgres und mehrere Instanzen wechseln. Am Framework selbst müsste ich dafür nichts umbauen.
 
-Allgemein passt React Router 7 gut, wenn das Projekt Formulare und Daten vom Server braucht, das Team schon React kann und die Kosten tief bleiben sollen, weil man nicht an einen Anbieter gebunden ist. Weniger passend ist es für eine reine statische Seite mit viel Inhalt (dafür wäre Astro einfacher) oder wenn man ein fertiges Komplettpaket mit Auth und Datenbank sucht.
+Mein Fazit: React Router 7 erfüllt alle Anforderungen. Für einen Blog ganz ohne Formular wäre ein statisches Framework wie Astro wahrscheinlich einfacher. Sobald man Daten auf dem Server speichern will, passt React Router aber gut, vor allem wenn man schon React kann und nicht an einen bestimmten Anbieter gebunden sein will.
 
 ## Erkenntnisse
 
-- Ein Framework zu wählen hängt weniger vom Code ab als vom Hosting und den Kosten. Das Programmieren des Blogs ging schnell, mehr Zeit brauchten Datenbank und Deployment.
-- React Router 7 ist nah an Web-Standards (Formulare, Request/Response). Dadurch funktioniert der Blog sogar ohne JavaScript, und man versteht gut, was auf dem Server passiert.
-- Die schnellen Versionswechsel (Remix → RR7 → RR8, dazu Remix 3) sind ein Risiko. Man muss mit einem Upgrade pro Jahr rechnen.
-- Ein eigener Server ist günstig und flexibel, man ist aber selbst für Updates, HTTPS und Backups zuständig. Bei einer PaaS bezahlt man diese Arbeit mit.
-- Lighthouse-Werte von 100 sind bei so einer kleinen App einfach zu erreichen. Für einen fairen Vergleich müssten alle Frameworks die gleiche App auf dem gleichen Hosting haben.
-- SQLite ist für ein Schulprojekt ideal, verhindert aber horizontales Skalieren. Die Datenbank ist für die Skalierbarkeit wichtiger als das Framework.
-
-## Checkliste
-
-- [x] Card gelesen und Framework-Features dokumentiert
-- [x] Blog gemäss Tutorial erstellt und lokal gestartet
-- [x] Projekt mit Git verwaltet
-- [x] Deployment auf IaaS durchgeführt
-- [x] Lighthouse-Messung durchgeführt und Werte notiert
-- [x] Alle vier Matrizen ausgefüllt (Zeile React Router 7)
-- [x] Projekt-Anforderungen und Takeaways aufgeschrieben
+- Den meisten Aufwand hatte ich nicht beim Code, sondern bei Datenbank, Deployment und Zertifikat. Wie gut ein Framework passt, hängt deshalb stark vom Hosting ab.
+- React Router 7 arbeitet nah an Web-Standards wie Formularen, Request und Response. Darum geht der Blog sogar ohne JavaScript, und ich habe gut verstanden, was auf dem Server passiert.
+- Die schnellen Versionswechsel sind ein echtes Risiko. Remix → RR7 → RR8 in zwei Jahren, dazu Remix 3 ohne React: Mit einem grösseren Upgrade pro Jahr muss man rechnen.
+- Ein eigener Server ist günstig und flexibel. Updates, HTTPS und Backups muss ich dann aber selbst machen. Bei einer PaaS bezahlt man genau diese Arbeit mit.
+- 100 Punkte in Lighthouse sind bei so einer kleinen App leicht zu erreichen. Fair vergleichen kann man die Frameworks nur mit der gleichen App auf dem gleichen Hosting.
+- SQLite ist für ein Schulprojekt ideal, verhindert aber horizontales Skalieren. Für die Skalierbarkeit zählt die Datenbank mehr als das Framework.
 
 ## Quellen
 
