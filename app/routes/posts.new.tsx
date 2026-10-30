@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { data, Form, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/posts.new";
 import { createPost } from "~/lib/posts.server";
@@ -56,6 +57,16 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
   const errors = actionData?.errors;
+  const titleRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const alertRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (!errors) return;
+    if (errors.title) titleRef.current?.focus();
+    else if (errors.body) bodyRef.current?.focus();
+    else if (errors.form) alertRef.current?.focus();
+  }, [actionData]);
 
   return (
     <>
@@ -64,7 +75,7 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
       </header>
       <Form method="post" className="form">
         {errors?.form && (
-          <p role="alert" className="alert">
+          <p ref={alertRef} role="alert" tabIndex={-1} className="alert">
             <AlertIcon />
             <span>{errors.form}</span>
           </p>
@@ -84,6 +95,7 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
             Titel
           </label>
           <input
+            ref={titleRef}
             id="title"
             name="title"
             type="text"
@@ -106,6 +118,7 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
             Text
           </label>
           <textarea
+            ref={bodyRef}
             id="body"
             name="body"
             rows={8}
