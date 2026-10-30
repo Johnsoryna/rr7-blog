@@ -1,7 +1,7 @@
 import { data, Link } from "react-router";
 import type { Route } from "./+types/posts.$postId";
 import { getPost } from "~/lib/posts.server";
-import { formatDate } from "~/lib/date";
+import { formatDate, toIsoDate } from "~/lib/date";
 
 export function meta({ loaderData }: Route.MetaArgs) {
   if (!loaderData) {
@@ -26,19 +26,24 @@ export default function PostDetail({ loaderData }: Route.ComponentProps) {
 
   return (
     <article>
-      <Link
-        to="/"
-        className="text-sm text-blue-700 hover:underline dark:text-blue-400"
-      >
-        ← Alle Beiträge
-      </Link>
-      <h1 className="mt-4 text-3xl font-bold">{post.title}</h1>
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        {formatDate(post.created_at)}
+      <nav className="trail" aria-label="Navigationspfad">
+        <Link to="/" className="trail-link">
+          <span className="trail-dot" aria-hidden="true" />
+          Alle Beiträge
+        </Link>
+        <span className="trail-line" aria-hidden="true" />
+        <span className="trail-dot is-current" aria-hidden="true" />
+        <span className="visually-hidden" aria-current="page">
+          {post.title}
+        </span>
+      </nav>
+      <h1 className="post-title">{post.title}</h1>
+      <p className="post-date">
+        <time dateTime={toIsoDate(post.created_at)}>
+          {formatDate(post.created_at)}
+        </time>
       </p>
-      <div className="mt-6 whitespace-pre-line leading-relaxed">
-        {post.body}
-      </div>
+      <div className="post-body">{post.body}</div>
     </article>
   );
 }

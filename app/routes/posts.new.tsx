@@ -2,6 +2,7 @@ import { data, Form, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/posts.new";
 import { createPost } from "~/lib/posts.server";
 import { getClientIp, isRateLimited } from "~/lib/rate-limit.server";
+import { AlertIcon } from "~/components/icons";
 
 const MAX_TITLE = 120;
 const MAX_BODY = 10000;
@@ -55,19 +56,17 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
   const errors = actionData?.errors;
-  const inputClass =
-    "mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900";
 
   return (
     <>
-      <h1 className="text-3xl font-bold">Neuer Beitrag</h1>
-      <Form method="post" className="mt-6 space-y-5">
+      <header className="page-head">
+        <h1 className="page-title">Neuer Beitrag</h1>
+      </header>
+      <Form method="post" className="form">
         {errors?.form && (
-          <p
-            role="alert"
-            className="rounded border border-red-300 bg-red-50 p-3 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
-          >
-            {errors.form}
+          <p role="alert" className="alert">
+            <AlertIcon />
+            <span>{errors.form}</span>
           </p>
         )}
         <div className="hidden" aria-hidden="true">
@@ -80,8 +79,8 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
             autoComplete="off"
           />
         </div>
-        <div>
-          <label htmlFor="title" className="block font-medium">
+        <div className="field">
+          <label htmlFor="title" className="field-label">
             Titel
           </label>
           <input
@@ -93,19 +92,17 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
             defaultValue={actionData?.values.title}
             aria-invalid={errors?.title ? true : undefined}
             aria-describedby={errors?.title ? "title-error" : undefined}
-            className={inputClass}
+            className="input"
           />
           {errors?.title && (
-            <p
-              id="title-error"
-              className="mt-1 text-sm text-red-700 dark:text-red-400"
-            >
-              {errors.title}
+            <p id="title-error" className="field-error">
+              <AlertIcon />
+              <span>{errors.title}</span>
             </p>
           )}
         </div>
-        <div>
-          <label htmlFor="body" className="block font-medium">
+        <div className="field">
+          <label htmlFor="body" className="field-label">
             Text
           </label>
           <textarea
@@ -117,24 +114,25 @@ export default function NewPost({ actionData }: Route.ComponentProps) {
             defaultValue={actionData?.values.body}
             aria-invalid={errors?.body ? true : undefined}
             aria-describedby={errors?.body ? "body-error" : undefined}
-            className={inputClass}
+            className="input"
           />
           {errors?.body && (
-            <p
-              id="body-error"
-              className="mt-1 text-sm text-red-700 dark:text-red-400"
-            >
-              {errors.body}
+            <p id="body-error" className="field-error">
+              <AlertIcon />
+              <span>{errors.body}</span>
             </p>
           )}
         </div>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-60"
-        >
-          {submitting ? "Wird gespeichert..." : "Veröffentlichen"}
-        </button>
+        <div className="form-actions">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="button button-primary"
+          >
+            {submitting && <span className="spinner" aria-hidden="true" />}
+            {submitting ? "Wird gespeichert..." : "Veröffentlichen"}
+          </button>
+        </div>
       </Form>
     </>
   );

@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { getPosts } from "~/lib/posts.server";
-import { formatDate } from "~/lib/date";
+import { formatDate, toIsoDate } from "~/lib/date";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -22,34 +22,44 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold">Alle Beiträge</h1>
+      <header className="page-head">
+        <h1 className="page-title">Alle Beiträge</h1>
+        <p className="page-meta">
+          {posts.length === 1 ? "1 Beitrag" : `${posts.length} Beiträge`}
+        </p>
+      </header>
       {posts.length === 0 ? (
-        <p className="mt-6">
+        <p className="route-empty">
           Noch keine Beiträge.{" "}
-          <Link
-            to="/posts/new"
-            className="text-blue-700 underline dark:text-blue-400"
-          >
+          <Link to="/posts/new" className="text-link">
             Schreib den ersten.
           </Link>
         </p>
       ) : (
-        <ul className="mt-6 divide-y divide-gray-200 dark:divide-gray-800">
-          {posts.map((post) => (
-            <li key={post.id} className="py-4">
-              <Link
-                to={`/posts/${post.id}`}
-                className="text-xl font-semibold text-blue-700 hover:underline dark:text-blue-400"
-              >
-                {post.title}
-              </Link>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {formatDate(post.created_at)}
-              </p>
-              <p className="mt-2 line-clamp-2">{post.body}</p>
+        <ol className="route">
+          {posts.map((post, index) => (
+            <li
+              key={post.id}
+              className="stop"
+              style={{ "--i": index } as React.CSSProperties}
+            >
+              <span className="stop-dot" aria-hidden="true" />
+              <article className="stop-body">
+                <p className="stop-date">
+                  <time dateTime={toIsoDate(post.created_at)}>
+                    {formatDate(post.created_at)}
+                  </time>
+                </p>
+                <h2 className="stop-title">
+                  <Link to={`/posts/${post.id}`} className="stop-link">
+                    {post.title}
+                  </Link>
+                </h2>
+                <p className="stop-excerpt">{post.body}</p>
+              </article>
             </li>
           ))}
-        </ul>
+        </ol>
       )}
     </>
   );
