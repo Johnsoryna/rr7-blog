@@ -219,6 +219,7 @@ body {
   line-height: 1.08;
   letter-spacing: -0.025em;
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .page-meta {
@@ -355,6 +356,7 @@ body {
   line-height: 1.2;
   letter-spacing: -0.015em;
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .stop-link {
@@ -374,6 +376,7 @@ body {
 
 .stop-body {
   position: relative;
+  min-width: 0;
 }
 
 .stop-body:has(.stop-link:focus-visible) {
@@ -397,6 +400,7 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .route-empty {
@@ -478,6 +482,7 @@ body {
   line-height: 1.08;
   letter-spacing: -0.025em;
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .post-date {
